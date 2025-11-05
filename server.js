@@ -1,38 +1,24 @@
-require('dotenv').config();
-
-import express from "express";
-import { log } from "node:console";
-import twilio from "twilio";
+import 'dotenv/config';
+import express from 'express';
+import twilio from 'twilio';
 
 const app = express();
-app.use(express.json());
+const port = process.env.PORT || 10000;
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-const client = twilio(accountSid, authToken);
-
-app.get('/sos',async (req,res) => {
-    try{
-        const to = "+918927951351";
-        const from = "+12513094209";
-        const messageText = "SOS alert! Please check location sent to u in message";
-        const twimlUrl = `https://twimlets.com/message?Message%5B0%5D=${encodeURIComponent(messageText)}`;
-        const call = await client.calls.create({
-      to,
-      from,
-      url: twimlUrl,
+app.get('/call', async (req, res) => {
+  try {
+    const call = await client.calls.create({
+      from: process.env.TWILIO_FROM,
+      to: process.env.TWILIO_TO,
+      url: 'http://demo.twilio.com/docs/voice.xml'
     });
-
-    console.log("Call triggered: ", call.sid);
-    res.json({ success: true , sid: call.sid});
-    
-    }catch(error){
-        console.log("Error", error.message);
-        res.status(500).json({success:false,error:error.message});        
-    }
+    res.send(`✅ Call initiated: ${call.sid}`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('❌ Error: ' + err.message);
+  }
 });
 
-app.get('/',(req,res) => res.send("SOS Cal APi is live!"));
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server Running on Port ${PORT}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));
