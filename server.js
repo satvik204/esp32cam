@@ -12,7 +12,7 @@ app.get('/call', async (req, res) => {
     const call = await client.calls.create({
       from: process.env.TWILIO_FROM,
       to: process.env.TWILIO_TO,
-      url: 'http://demo.twilio.com/docs/voice.xml'
+      url: 'This is an SOS Call. Check the location sent to u via message';
     });
     res.send(`✅ Call initiated: ${call.sid}`);
   } catch (err) {
